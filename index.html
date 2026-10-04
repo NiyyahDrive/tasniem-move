@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tasniem Move — 7 minuten bodyweight</title>
+  <meta name="description" content="Begeleide 7-minuten workouts met lichaamsgewicht voor conditie en spierkracht. Zonder account, werkt offline.">
+  <meta name="theme-color" content="#130f1d">
+  <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tasniem Move">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== App-shell ===== -->
+<div id="app" class="shell" hidden>
+  <header class="topbar">
+    <span class="brand"><span class="brand-mark" aria-hidden="true"></span>Tasniem Move</span>
+  </header>
+
+  <main id="main">
+    <section class="view" id="view-home" aria-labelledby="home-title" hidden></section>
+    <section class="view" id="view-library" aria-labelledby="library-title" hidden></section>
+    <section class="view" id="view-detail" aria-labelledby="detail-title" hidden></section>
+    <section class="view" id="view-progress" aria-labelledby="progress-title" hidden></section>
+
+    <section class="view" id="view-settings" aria-labelledby="settings-title" hidden>
+      <h1 id="settings-title" tabindex="-1">Instellingen</h1>
+
+      <section class="card" aria-labelledby="set-prefs">
+        <h2 id="set-prefs">Jouw voorkeuren</h2>
+        <dl class="summary" id="prefs-summary"></dl>
+        <button type="button" class="btn secondary" data-action="open-onboarding">Voorkeuren aanpassen</button>
+      </section>
+
+      <section class="card" aria-labelledby="set-goal">
+        <h2 id="set-goal">Weekdoel</h2>
+        <p class="muted">Aantal actieve dagen per week waar je naartoe werkt.</p>
+        <div class="stepper">
+          <button type="button" class="btn secondary square" data-action="goal-down" aria-label="Weekdoel verlagen">−</button>
+          <output id="goal-value" aria-live="polite"></output>
+          <button type="button" class="btn secondary square" data-action="goal-up" aria-label="Weekdoel verhogen">+</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="set-signals">
+        <h2 id="set-signals">Signalen tijdens de workout</h2>
+        <label class="switch-row" for="pref-sound">
+          <span>Geluidssignalen</span>
+          <input type="checkbox" id="pref-sound" class="switch">
+        </label>
+        <label class="switch-row" for="pref-vibrate">
+          <span>Trillen</span>
+          <input type="checkbox" id="pref-vibrate" class="switch">
+        </label>
+        <p class="fine" id="signal-note"></p>
+      </section>
+
+      <section class="card" aria-labelledby="set-data">
+        <h2 id="set-data">Gegevens en privacy</h2>
+        <p class="muted">Alles blijft op dit toestel. Geen account, geen tracking. Maak af en toe een back-up: browsergegevens kunnen verloren gaan.</p>
+        <p class="fine" id="data-status"></p>
+        <div class="btn-row">
+          <button type="button" class="btn secondary" data-action="export">Back-up downloaden</button>
+          <button type="button" class="btn secondary" data-action="import">Back-up terugzetten</button>
+        </div>
+        <input type="file" id="import-file" accept="application/json,.json" aria-label="Back-upbestand kiezen" hidden>
+        <button type="button" class="btn danger" data-action="wipe">Alle Tasniem Move-gegevens wissen</button>
+      </section>
+
+      <section class="card" aria-labelledby="set-safety">
+        <h2 id="set-safety">Veiligheid</h2>
+        <p class="muted">Tasniem Move geeft geen medisch advies. Stop direct bij pijn, duizeligheid of benauwdheid. Twijfel je of trainen verstandig is, overleg dan eerst met je arts.</p>
+      </section>
+
+      <p class="fine center">Tasniem Move · versie 1.0 · lokaal en offline</p>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Hoofdnavigatie">
+    <button type="button" class="tab" data-nav="home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>
+      <span>Vandaag</span>
+    </button>
+    <button type="button" class="tab" data-nav="library">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+      <span>Workouts</span>
+    </button>
+    <button type="button" class="tab" data-nav="progress">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>
+      <span>Voortgang</span>
+    </button>
+    <button type="button" class="tab" data-nav="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+      <span>Instellingen</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ===== Onboarding ===== -->
+<section id="onboarding" class="overlay onboarding" aria-labelledby="ob-title" hidden>
+  <form id="onboarding-form" class="overlay-inner" novalidate>
+    <span class="brand"><span class="brand-mark" aria-hidden="true"></span>Tasniem Move</span>
+    <h1 id="ob-title" tabindex="-1">Zeven minuten.<br>Alleen je eigen lichaam.</h1>
+    <p class="lead">Drie korte keuzes, dan stellen we je training af. Je kunt dit later altijd aanpassen.</p>
+
+    <fieldset class="choice-group">
+      <legend>Wat is je hoofddoel?</legend>
+      <label class="choice"><input type="radio" name="goal" value="conditie"><span class="choice-body"><strong>Conditie</strong><small>Meer adem, meer uithoudingsvermogen</small></span></label>
+      <label class="choice"><input type="radio" name="goal" value="kracht"><span class="choice-body"><strong>Spierkracht</strong><small>Sterker worden met gecontroleerde bewegingen</small></span></label>
+      <label class="choice"><input type="radio" name="goal" value="balans" checked><span class="choice-body"><strong>Gebalanceerd</strong><small>Afwisselend conditie en kracht</small></span></label>
+    </fieldset>
+
+    <fieldset class="choice-group">
+      <legend>Wat is je niveau?</legend>
+      <label class="choice"><input type="radio" name="level" value="beginner" checked><span class="choice-body"><strong>Beginner</strong><small>25 s werk · 10 s rust · lichtere varianten</small></span></label>
+      <label class="choice"><input type="radio" name="level" value="gemiddeld"><span class="choice-body"><strong>Gemiddeld</strong><small>28 s werk · 7 s rust</small></span></label>
+      <label class="choice"><input type="radio" name="level" value="gevorderd"><span class="choice-body"><strong>Gevorderd</strong><small>30 s werk · 5 s rust</small></span></label>
+    </fieldset>
+
+    <fieldset class="choice-group">
+      <legend>Gewrichtsvriendelijk trainen?</legend>
+      <label class="choice"><input type="checkbox" name="lowImpact"><span class="choice-body"><strong>Low impact</strong><small>Geen sprongen: elke impactvolle oefening krijgt een rustiger alternatief. Aanbevolen bij 50+ of gevoelige knieën, heupen of rug.</small></span></label>
+    </fieldset>
+
+    <p class="fine">Geen medisch advies. Stop bij pijn, duizeligheid of benauwdheid en overleg bij twijfel met je arts.</p>
+
+    <div class="btn-row sticky-actions">
+      <button type="button" class="btn secondary" id="ob-cancel" data-action="close-onboarding" hidden>Annuleren</button>
+      <button type="submit" class="btn primary grow">Aan de slag</button>
+    </div>
+  </form>
+</section>
+
+<!-- ===== Begeleide workout ===== -->
+<section id="player" class="overlay player" aria-label="Begeleide workout" data-phase="prep" hidden>
+  <header class="player-top">
+    <button type="button" class="icon-btn" data-action="player-stop" aria-label="Workout stoppen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="player-meta">
+      <span id="p-workout"></span>
+      <span id="p-total"></span>
+    </div>
+    <button type="button" class="chip-toggle" id="p-low" data-action="player-low" aria-pressed="false">Low impact</button>
+  </header>
+
+  <ol class="p-steps" id="p-steps" aria-hidden="true"></ol>
+
+  <div class="player-main">
+    <p class="p-phase" id="p-phase"></p>
+    <div class="p-time" id="p-time" role="timer" aria-label="Resterende seconden"></div>
+    <div class="p-bar" aria-hidden="true"><span id="p-bar-fill"></span></div>
+    <h1 class="p-name" id="p-name"></h1>
+    <p class="p-cue" id="p-cue"></p>
+    <p class="p-next" id="p-next"></p>
+  </div>
+
+  <footer class="player-controls">
+    <button type="button" class="ctrl" data-action="player-prev" aria-label="Vorige oefening">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14M19 5l-9 7 9 7z"/></svg>
+    </button>
+    <button type="button" class="ctrl ctrl-main" id="p-toggle" data-action="player-toggle" aria-label="Pauzeren">
+      <svg class="ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+      <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
+      <span id="p-toggle-label">Pauze</span>
+    </button>
+    <button type="button" class="ctrl" data-action="player-next" aria-label="Volgende oefening">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 5v14M5 5l9 7-9 7z"/></svg>
+    </button>
+  </footer>
+</section>
+
+<!-- ===== Resultaat ===== -->
+<section id="result" class="overlay result" aria-labelledby="r-title" hidden>
+  <form id="result-form" class="overlay-inner" novalidate>
+    <p class="eyebrow">Voltooid</p>
+    <h1 id="r-title" tabindex="-1">Klaar. Goed gedaan.</h1>
+    <p class="lead" id="r-summary"></p>
+    <div class="tiles" id="r-tiles"></div>
+    <div id="r-badges"></div>
+
+    <fieldset class="choice-group effort">
+      <legend>Hoe voelde het?</legend>
+      <label class="choice"><input type="radio" name="effort" value="licht"><span class="choice-body"><strong>Licht</strong></span></label>
+      <label class="choice"><input type="radio" name="effort" value="goed"><span class="choice-body"><strong>Goed</strong></span></label>
+      <label class="choice"><input type="radio" name="effort" value="zwaar"><span class="choice-body"><strong>Zwaar</strong></span></label>
+    </fieldset>
+
+    <label class="field-label" for="r-note">Notitie <span class="muted">(optioneel)</span></label>
+    <textarea id="r-note" name="note" rows="3" maxlength="280" placeholder="Energie, slaap, een oefening die lastig was…"></textarea>
+
+    <div class="btn-row sticky-actions">
+      <button type="submit" class="btn primary grow">Opslaan en afsluiten</button>
+    </div>
+  </form>
+</section>
+
+<!-- ===== Bevestiging ===== -->
+<dialog id="confirm" aria-labelledby="confirm-title">
+  <form method="dialog">
+    <h2 id="confirm-title"></h2>
+    <p id="confirm-body"></p>
+    <div class="btn-row">
+      <button class="btn secondary grow" value="cancel" id="confirm-cancel">Annuleren</button>
+      <button class="btn primary grow" value="ok" id="confirm-ok">OK</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="sr-live" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+<noscript><p style="padding:24px;color:#fff">Tasniem Move heeft JavaScript nodig om te werken.</p></noscript>
+<script src="app.js" defer></script>
+</body>
+</html>
